@@ -1,4 +1,7 @@
-jobs={'job50':'/home/ec2-user/environment/ictprg302/file1.dat'
+log_file_path = '/home/ec2-user/environment/ictprg302/backup.log'
+
+jobs={'job50':['/home/ec2-user/environment/ictprg302/file1.dat','/home/ec2-user/environment/ictprg302/file50.dat'],
+'job20':['/home/ec2-user/environment/ictprg302/fly']
 }
 
 
@@ -10,4 +13,4 @@ smtp={"sender": "30025606p@gmail.com",                          #elasticemail.co
         "server": "smtp.elasticemail.com",                      # elasticemail.com SMTP server
         "port": 2525,                                           # elasticemail.com SMTP port
         "user": "30025606p@gmail.com",                          # elasticemail.com user
-        "password": ""}     # elasticemail.com password
+        "password": "A2D2794FA1BBECAF14038F54B5E176D8A57B"}     # elasticemail.com password

@@ -14,10 +14,17 @@ import pathlib
 import shutil
 from datetime import datetime
 import smtplib
-from backupcfg import smtp
+from backupcfg import smtp,log_file_path
 
-
+# error handling process
 def error_handling(error_messages, dateTimeStamp):
+    """
+    Handle errors by printing error messages, sending emails, and logging.
+    
+    Parameters:
+        error_messages (str): Error message to handle.
+        dateTimeStamp (str): Date and time when the error occurred.
+    """
     print(error_messages)
     sendEmail(error_messages, dateTimeStamp)
     logging(error_messages, dateTimeStamp,True)
@@ -45,8 +52,16 @@ def sendEmail(message, dateTimeStamp):
         print("ERROR: Send email failed: " + str(e), file=sys.stderr)
 
 def logging(error_messages, dateTimeStamp,iserror):
+    """
+    Log messages to a file.
+    
+    Parameters:
+        error_messages (str): Message to log.
+        dateTimeStamp (str): Date and time when the message was logged.
+        iserror (bool): Indicates whether the message is an error message.
+    """
     try:
-        file = open("/home/ec2-user/environment/ictprg302/backup.log", "a")
+        file = open(log_file_path, "a")
         if iserror:
             file.write(f"FAILURE {dateTimeStamp} {error_messages} .\n")
             file.close()
@@ -63,7 +78,7 @@ def logging(error_messages, dateTimeStamp,iserror):
 def main():
     
     """
-    Your module description
+   Main function to perform backup operations.
     """
 
     try:
@@ -76,30 +91,29 @@ def main():
             if jobname not in jobs:
                 error_handling(f"ERROR: {jobname} is not in job", dateTimeStamp)
             else:
-                source = jobs[jobname]
-                if not os.path.exists(source):
-                    error_handling("ERROR: file " + source + " does not exist.", dateTimeStamp)
-                else:
-                    des = destinations['desti_path1']
-                    if not os.path.exists (des): 
-                        error_handling("ERROR: destination " + des + " does not exist.", dateTimeStamp)
+                for source in  jobs[jobname]:
+                    if not os.path.exists(source):
+                        error_handling("ERROR: file " + source + " does not exist.", dateTimeStamp)
                     else:
-                        #pathlib.PurePath is a tool for simplifying cross-platform path operations..
-                        srcPath = pathlib.PurePath(source)
-                        dstLoc = des  + srcPath.name + "-" + dateTimeStamp
-                        if pathlib.Path(source).is_dir():
-                            shutil.copytree(source, dstLoc)
+                        des = destinations['desti_path1']
+                        if not os.path.exists (des): 
+                            error_handling("ERROR: destination " + des + " does not exist.", dateTimeStamp)
                         else:
-                            shutil.copy2(source, dstLoc)
-                            logging(f" backedup{source} to {dstLoc}", dateTimeStamp,False)
-
+                            #pathlib.PurePath is a tool for simplifying cross-platform path operations..
+                            srcPath = pathlib.PurePath(source)
+                            dstLoc = des  + srcPath.name + "-" + dateTimeStamp
+                            if pathlib.Path(source).is_dir():
+                                shutil.copytree(source, dstLoc)
+                            else:
+                                shutil.copy2(source, dstLoc)
+                                logging(f" backedup{source} to {dstLoc}", dateTimeStamp,False)
+    
     except Exception as err:
-        print(f"ERROR: GAME OVER: {err}")
+        print(f"ERROR: System Failure: {err}")
+        
+        # logging function
 
 
-
- 
-
-
+# Execute the main function when the script is run
 if __name__ == "__main__":
     main()    
